@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { PanResponder, View } from 'react-native';
-import Svg, { Circle, G, LinearGradient, Path, Defs, Stop } from 'react-native-svg';
+import Svg, { Circle, G, LinearGradient, Path, Defs, Stop, ForeignObject } from 'react-native-svg';
 import range from 'lodash.range';
 import { interpolateHcl as interpolateGradient } from 'd3-interpolate';
 import ClockFace from './ClockFace';
@@ -60,6 +60,8 @@ export default class CircularSlider extends PureComponent {
     bgCircleColor: PropTypes.string,
     stopIcon: PropTypes.element,
     startIcon: PropTypes.element,
+    endCircleRadius: PropTypes.number,
+    bgButtonsColor: PropTypes.string,
   };
 
   static defaultProps = {
@@ -104,14 +106,14 @@ export default class CircularSlider extends PureComponent {
     });
 
     this._wakePanResponder = PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onPanResponderGrant: (evt, gestureState) => this.setCircleCenter(),
-      onPanResponderMove: (evt, { moveX, moveY }) => {
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: () => this.setCircleCenter(),
+      onPanResponderMove: (_, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
-        const { angleLength, startAngle, onUpdate } = this.props;
+        const { startAngle, onUpdate } = this.props;
 
-        let newAngle = Math.atan2(moveY - circleCenterY, moveX - circleCenterX) + Math.PI / 2;
+        const newAngle = Math.atan2(moveY - circleCenterY, moveX - circleCenterX) + Math.PI / 2;
         let newAngleLength = (newAngle - startAngle) % (2 * Math.PI);
 
         if (newAngleLength < 0) {
@@ -135,8 +137,8 @@ export default class CircularSlider extends PureComponent {
   };
 
   getContainerWidth() {
-    const { strokeWidth, radius } = this.props;
-    return strokeWidth + radius * 2 + 2;
+    const { strokeWidth, radius, endCircleRadius } = this.props;
+    return strokeWidth + radius * 2 + 2 + (endCircleRadius * 2 - strokeWidth);
   }
 
   render() {
@@ -153,6 +155,8 @@ export default class CircularSlider extends PureComponent {
       clockFaceColor,
       startIcon,
       stopIcon,
+      endCircleRadius,
+      bgButtonsColor,
     } = this.props;
 
     const containerWidth = this.getContainerWidth();
@@ -204,7 +208,7 @@ export default class CircularSlider extends PureComponent {
 
           <G
             transform={{
-              translate: `${strokeWidth / 2 + radius + 1}, ${strokeWidth / 2 + radius + 1}`,
+              translate: `${strokeWidth / 2 + radius + 1}, ${strokeWidth / 2 + radius + 1 + (endCircleRadius * 2 - strokeWidth) / 2}`,
             }}
           >
             <Circle
@@ -213,7 +217,7 @@ export default class CircularSlider extends PureComponent {
               fill="transparent"
               stroke={bgCircleColor}
             />
-            {showClockFace && <ClockFace r={radius - strokeWidth / 2} stroke={clockFaceColor} />}
+            {showClockFace && <ClockFace r={radius - strokeWidth / 2 - 5} stroke={clockFaceColor} />}
             {range(segments).map((i) => {
               const { fromX, fromY, toX, toY } = calculateArcCircle(
                 i,
@@ -248,12 +252,14 @@ export default class CircularSlider extends PureComponent {
               {...this._wakePanResponder.panHandlers}
             >
               <Circle
-                r={(strokeWidth - 1) / 2}
-                fill={bgCircleColor}
+                r={endCircleRadius}
+                fill={bgButtonsColor}
                 stroke={gradientColorTo}
-                strokeWidth="1"
+                strokeWidth="2"
               />
-              {stopIcon}
+              <ForeignObject transform={{ translate: `${-endCircleRadius / 2 + 2}, ${-endCircleRadius / 2 + 2}` }}>
+                {stopIcon}
+              </ForeignObject>
             </G>
 
             {/*
@@ -272,12 +278,14 @@ export default class CircularSlider extends PureComponent {
               {...this._sleepPanResponder.panHandlers}
             >
               <Circle
-                r={(strokeWidth - 1) / 2}
-                fill={bgCircleColor}
+                r={endCircleRadius}
+                fill={bgButtonsColor}
                 stroke={gradientColorFrom}
-                strokeWidth="1"
+                strokeWidth="2"
               />
-              {startIcon}
+              <ForeignObject transform={{ translate: `${-endCircleRadius / 2 + 2}, ${-endCircleRadius / 2 + 2}` }}>
+                {startIcon}
+              </ForeignObject>
             </G>
           </G>
         </Svg>
