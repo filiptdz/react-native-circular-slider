@@ -62,7 +62,7 @@ export default class CircularSlider extends PureComponent {
     startIcon: PropTypes.element,
     endCircleRadius: PropTypes.number,
     bgButtonsColor: PropTypes.string,
-    setScrollEnabled: PropTypes.func,
+    onStateUpdate: PropTypes.func,
   };
 
   static defaultProps = {
@@ -89,7 +89,7 @@ export default class CircularSlider extends PureComponent {
       onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: () => {
         this.setCircleCenter();
-        if (setScrollEnabled) setScrollEnabled(false);
+        if (this.props.onStateUpdate) this.props.onStateUpdate(true);
       },
       onPanResponderMove: (evt, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
@@ -111,7 +111,7 @@ export default class CircularSlider extends PureComponent {
         onUpdate({ startAngle: newAngle, angleLength: newAngleLength % (2 * Math.PI) });
       },
       onPanResponderRelease: () => {
-        if (setScrollEnabled) setScrollEnabled(true);
+        if (this.props.onStateUpdate) this.props.onStateUpdate(false);
       },
     });
 
@@ -123,7 +123,7 @@ export default class CircularSlider extends PureComponent {
       onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: () => {
         this.setCircleCenter();
-        if (setScrollEnabled) setScrollEnabled(false);
+        if (this.props.onStateUpdate) this.props.onStateUpdate(true);
       },
       onPanResponderMove: (_, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
@@ -139,7 +139,7 @@ export default class CircularSlider extends PureComponent {
         onUpdate({ startAngle, angleLength: newAngleLength });
       },
       onPanResponderRelease: () => {
-        if (setScrollEnabled) setScrollEnabled(true);
+        if (this.props.onStateUpdate) this.props.onStateUpdate(false);
       },
     });
   }
