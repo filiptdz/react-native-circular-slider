@@ -62,6 +62,7 @@ export default class CircularSlider extends PureComponent {
     startIcon: PropTypes.element,
     endCircleRadius: PropTypes.number,
     bgButtonsColor: PropTypes.string,
+    setScrollEnabled: PropTypes.func,
   };
 
   static defaultProps = {
@@ -86,7 +87,10 @@ export default class CircularSlider extends PureComponent {
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: () => this.setCircleCenter(),
+      onPanResponderGrant: () => {
+        this.setCircleCenter();
+        if (setScrollEnabled) setScrollEnabled(false);
+      },
       onPanResponderMove: (evt, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
         const { angleLength, startAngle, onUpdate } = this.props;
@@ -105,7 +109,9 @@ export default class CircularSlider extends PureComponent {
         }
 
         onUpdate({ startAngle: newAngle, angleLength: newAngleLength % (2 * Math.PI) });
-        return true;
+      },
+      onPanResponderRelease: () => {
+        if (setScrollEnabled) setScrollEnabled(true);
       },
     });
 
@@ -115,7 +121,10 @@ export default class CircularSlider extends PureComponent {
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: () => this.setCircleCenter(),
+      onPanResponderGrant: () => {
+        this.setCircleCenter();
+        if (setScrollEnabled) setScrollEnabled(false);
+      },
       onPanResponderMove: (_, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
         const { startAngle, onUpdate } = this.props;
@@ -128,7 +137,9 @@ export default class CircularSlider extends PureComponent {
         }
 
         onUpdate({ startAngle, angleLength: newAngleLength });
-        return true;
+      },
+      onPanResponderRelease: () => {
+        if (setScrollEnabled) setScrollEnabled(true);
       },
     });
   }
@@ -142,7 +153,6 @@ export default class CircularSlider extends PureComponent {
       const halfOfContainer = this.getContainerWidth() / 2;
       this.setState({ circleCenterX: px + halfOfContainer, circleCenterY: py + halfOfContainer });
     });
-    return true;
   };
 
   getContainerWidth() {
