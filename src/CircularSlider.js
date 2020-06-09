@@ -81,9 +81,12 @@ export default class CircularSlider extends PureComponent {
 
   UNSAFE_componentWillMount() {
     this._sleepPanResponder = PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onPanResponderGrant: (evt, gestureState) => this.setCircleCenter(),
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: () => this.setCircleCenter(),
       onPanResponderMove: (evt, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
         const { angleLength, startAngle, onUpdate } = this.props;
@@ -102,12 +105,16 @@ export default class CircularSlider extends PureComponent {
         }
 
         onUpdate({ startAngle: newAngle, angleLength: newAngleLength % (2 * Math.PI) });
+        return true;
       },
     });
 
     this._wakePanResponder = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: () => this.setCircleCenter(),
       onPanResponderMove: (_, { moveX, moveY }) => {
         const { circleCenterX, circleCenterY } = this.state;
@@ -121,6 +128,7 @@ export default class CircularSlider extends PureComponent {
         }
 
         onUpdate({ startAngle, angleLength: newAngleLength });
+        return true;
       },
     });
   }
@@ -134,6 +142,7 @@ export default class CircularSlider extends PureComponent {
       const halfOfContainer = this.getContainerWidth() / 2;
       this.setState({ circleCenterX: px + halfOfContainer, circleCenterY: py + halfOfContainer });
     });
+    return true;
   };
 
   getContainerWidth() {
@@ -208,7 +217,9 @@ export default class CircularSlider extends PureComponent {
 
           <G
             transform={{
-              translate: `${strokeWidth / 2 + radius + 1}, ${strokeWidth / 2 + radius + 1 + (endCircleRadius * 2 - strokeWidth) / 2}`,
+              translate: `${strokeWidth / 2 + radius + 1}, ${
+                strokeWidth / 2 + radius + 1 + (endCircleRadius * 2 - strokeWidth) / 2
+              }`,
             }}
           >
             <Circle
@@ -217,7 +228,9 @@ export default class CircularSlider extends PureComponent {
               fill="transparent"
               stroke={bgCircleColor}
             />
-            {showClockFace && <ClockFace r={radius - strokeWidth / 2 - 5} stroke={clockFaceColor} />}
+            {showClockFace && (
+              <ClockFace r={radius - strokeWidth / 2 - 5} stroke={clockFaceColor} />
+            )}
             {range(segments).map((i) => {
               const { fromX, fromY, toX, toY } = calculateArcCircle(
                 i,
@@ -257,7 +270,11 @@ export default class CircularSlider extends PureComponent {
                 stroke={gradientColorTo}
                 strokeWidth="2"
               />
-              <ForeignObject transform={{ translate: `${-endCircleRadius / 2 + 2}, ${-endCircleRadius / 2 + 2}` }}>
+              <ForeignObject
+                transform={{
+                  translate: `${-endCircleRadius / 2 + 2}, ${-endCircleRadius / 2 + 2}`,
+                }}
+              >
                 {stopIcon}
               </ForeignObject>
             </G>
@@ -283,7 +300,11 @@ export default class CircularSlider extends PureComponent {
                 stroke={gradientColorFrom}
                 strokeWidth="2"
               />
-              <ForeignObject transform={{ translate: `${-endCircleRadius / 2 + 2}, ${-endCircleRadius / 2 + 2}` }}>
+              <ForeignObject
+                transform={{
+                  translate: `${-endCircleRadius / 2 + 2}, ${-endCircleRadius / 2 + 2}`,
+                }}
+              >
                 {startIcon}
               </ForeignObject>
             </G>
