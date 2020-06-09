@@ -227,9 +227,10 @@ export default class CircularSlider extends PureComponent {
 
           <G
             transform={{
-              translate: `${strokeWidth / 2 + radius + 1}, ${
-                strokeWidth / 2 + radius + 1 + (endCircleRadius * 2 - strokeWidth) / 2
-              }`,
+              translate: `
+                ${strokeWidth / 2 + radius + 1 + (endCircleRadius * 2 - strokeWidth) / 2},
+                ${strokeWidth / 2 + radius + 1 + (endCircleRadius * 2 - strokeWidth) / 2}
+              `,
             }}
           >
             <Circle
